@@ -91,8 +91,11 @@ export async function getSkuProductTypes() {
 }
 
 // ─── Budget Production ───────────────────────────────────
+// ─── Budget Production ───────────────────────────────────────────────────────
+// แทนที่ส่วน Budget Production เดิมใน api.ts
+
 export interface YearlyData {
-  year: number | string;
+  year: number;
   is_forecast: boolean;
   production_ml: number | null;
   capacity_ml: number | null;
@@ -101,23 +104,45 @@ export interface YearlyData {
 
 export interface BudgetProduction {
   _id: string;
+  level: 'plant' | 'line_category' | 'line' | 'product';
   plant: string;
-  line: string;
-  product: string;
-  type: string;
-  line_category: string;
+  line_category: string | null;
+  line: string | null;
+  product: string | null;
   yearly_data: YearlyData[];
+  meta?: {
+    source_file: string;
+    sheet: string;
+    created_at: string;
+  };
 }
 
 export async function getBudgetProduction(params?: Record<string, string>) {
   const qs = params ? '?' + new URLSearchParams(params).toString() : '';
-  return apiFetch<{ success: boolean; count: number; data: BudgetProduction[] }>(`/budget-production${qs}`);
+  return apiFetch<{ success: boolean; count: number; data: BudgetProduction[] }>(
+    `/budget-production${qs}`
+  );
 }
 
 export async function getBudgetPlants() {
   return apiFetch<{ success: boolean; data: string[] }>('/budget-production/meta/plants');
 }
 
-export async function getBudgetTypes() {
-  return apiFetch<{ success: boolean; data: string[] }>('/budget-production/meta/types');
+export async function getBudgetLines(params?: { plant?: string; line_category?: string }) {
+  const qs = params ? '?' + new URLSearchParams(params as Record<string, string>).toString() : '';
+  return apiFetch<{ success: boolean; data: string[] }>(`/budget-production/meta/lines${qs}`);
 }
+
+export async function getBudgetLineCategories(plant?: string) {
+  const qs = plant ? `?plant=${plant}` : '';
+  return apiFetch<{ success: boolean; data: string[] }>(
+    `/budget-production/meta/line-categories${qs}`
+  );
+}
+
+export async function getBudgetProducts(params?: { plant?: string; line?: string; line_category?: string }) {
+  const qs = params ? '?' + new URLSearchParams(params as Record<string, string>).toString() : '';
+  return apiFetch<{ success: boolean; data: string[] }>(`/budget-production/meta/products${qs}`);
+}
+
+// ลบ getBudgetTypes() ออก — ไม่มีใน schema ใหม่แล้ว
