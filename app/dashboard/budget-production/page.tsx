@@ -127,10 +127,12 @@ export default function BudgetProductionPage() {
   const tree: TreePlant[] = useMemo(() => {
     const map = new Map<string, Map<string, TreeProduct[]>>();
     for (const d of allData) {
+      const line    = d.line    ?? '(no line)';
+      const product = d.product ?? '(no product)';
       if (!map.has(d.plant)) map.set(d.plant, new Map());
       const lineMap = map.get(d.plant)!;
-      if (!lineMap.has(d.line)) lineMap.set(d.line, []);
-      lineMap.get(d.line)!.push({ id: d._id, product: d.product, line: d.line, plant: d.plant });
+      if (!lineMap.has(line)) lineMap.set(line, []);
+      lineMap.get(line)!.push({ id: d._id, product, line, plant: d.plant });
     }
     return [...map.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([plant, lineMap]) => ({
       plant,
