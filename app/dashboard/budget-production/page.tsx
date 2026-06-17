@@ -408,7 +408,7 @@ export default function BudgetProductionPage() {
                         <td className="px-3 py-2.5 text-xs font-semibold" style={{ color: C.navy }}>{row.plant}</td>
                         <td className="px-3 py-2.5 text-xs" style={{ color: '#4A5568' }}>{row.line}</td>
                         <td className="px-3 py-2.5 text-xs font-medium max-w-[160px] truncate" style={{ color: C.navy }}
-                          title={row.product}>{row.product}</td>
+                          title={row.product ?? undefined}>{row.product ?? '—'}</td>
                         <td className="px-3 py-2.5 text-xs text-right tabular-nums" style={{ color: C.navy }}>
                           <span className="flex items-center justify-end gap-1">
                             {yd.is_forecast && (
