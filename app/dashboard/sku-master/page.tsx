@@ -63,8 +63,13 @@ export default function SkuMasterPage() {
   };
 
   const totalLines = useMemo(() => {
-    return new Set(data.map((d) => `${d.plant}-${d.line}`)).size;
-  }, [data]);
+  return new Set(
+    data.map(
+      (d) =>
+        `${d.plant}-${d.group_product ?? "Other"}-${d.line}`,
+    ),
+  ).size;
+}, [data]);
 
   const groupSummary = useMemo(() => {
     return groups.map((group) => {
@@ -91,26 +96,40 @@ export default function SkuMasterPage() {
   }, [data, groups]);
 
   const plantSummary = useMemo(() => {
-    return plants.map((plant) => {
-      const rows = data.filter((d) => d.plant === plant);
-      const groupMap = new Map<string, Set<string>>();
+  return plants.map((plant) => {
+    const rows = data.filter((d) => d.plant === plant);
 
-      rows.forEach((r) => {
-        const group = r.group_product ?? "Other";
-        if (!groupMap.has(group)) groupMap.set(group, new Set());
-        groupMap.get(group)?.add(r.line);
-      });
+    const groupMap = new Map<string, Set<string>>();
 
-      return {
-        plant,
-        lineCount: new Set(rows.map((r) => r.line)).size,
-        groups: Array.from(groupMap.entries()).map(([group, lines]) => ({
-          group,
-          lines: Array.from(lines),
-        })),
-      };
+    rows.forEach((r) => {
+      const group = r.group_product ?? "Other";
+
+      if (!groupMap.has(group)) {
+        groupMap.set(group, new Set());
+      }
+
+      // นับ Line แยกตาม Group Product
+      groupMap.get(group)?.add(r.line);
     });
-  }, [data, plants]);
+
+    return {
+      plant,
+
+      // เดิมนับเฉพาะชื่อ Line
+      // ใหม่: Line1(PET) กับ Line1(S&W) = 2 Lines
+
+      lineCount: Array.from(groupMap.values()).reduce(
+        (sum, lines) => sum + lines.size,
+        0,
+      ),
+
+      groups: Array.from(groupMap.entries()).map(([group, lines]) => ({
+        group,
+        lines: Array.from(lines),
+      })),
+    };
+  });
+}, [data, plants]);
 
   const rowsByGroupAndPlant = useMemo(() => {
     return data.filter((r) => {
