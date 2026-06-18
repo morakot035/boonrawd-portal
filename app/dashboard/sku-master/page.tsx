@@ -497,14 +497,27 @@ function SkuTableSection({
     const map = new Map<string, SkuMaster[]>();
 
     rows.forEach((r) => {
-      const key = `${r.plant}||${r.line}`;
-      if (!map.has(key)) map.set(key, []);
+      const group = r.group_product ?? "Other";
+
+      // สำคัญ: แยก Line ตาม Group Product
+      const key = `${r.plant}||${group}||${r.line}`;
+
+      if (!map.has(key)) {
+        map.set(key, []);
+      }
+
       map.get(key)?.push(r);
     });
 
     return Array.from(map.entries()).map(([key, items]) => {
-      const [plant, line] = key.split("||");
-      return { plant, line, items };
+      const [plant, group, line] = key.split("||");
+
+      return {
+        plant,
+        group,
+        line,
+        items,
+      };
     });
   }, [rows]);
 
@@ -525,77 +538,101 @@ function SkuTableSection({
       </div>
 
       <div className="space-y-3">
-        {grouped.map((g) => (
-          <div
-            key={`${g.plant}-${g.line}`}
-            className="bg-white border border-[#E4E7EC] rounded-xl overflow-hidden"
-          >
-            <div className="px-4 py-3 bg-[#FAFBFF] border-b border-[#F2F4F7] flex items-center gap-2">
-              <span className="text-sm font-bold">{g.plant}</span>
-              <span className="text-xs text-[#667085]">/ {g.line}</span>
-              <span className="ml-auto text-xs bg-[#F2F4F7] px-2 py-0.5 rounded-full">
-                {g.items.length} SKU
-              </span>
+        {grouped.map((g) => {
+          const c = GROUP_COLORS[g.group] ?? {
+            bg: "#F2F4F7",
+            text: "#475467",
+            dot: "#667085",
+          };
+
+          return (
+            <div
+              key={`${g.plant}-${g.group}-${g.line}`}
+              className="bg-white border border-[#E4E7EC] rounded-xl overflow-hidden"
+            >
+              <div className="px-4 py-3 bg-[#FAFBFF] border-b border-[#F2F4F7] flex items-center gap-2">
+                <span className="text-sm font-bold">{g.plant}</span>
+
+                <span
+                  className="px-2 py-0.5 rounded-md text-xs font-semibold"
+                  style={{
+                    backgroundColor: c.bg,
+                    color: c.text,
+                  }}
+                >
+                  {g.group}
+                </span>
+
+                <span className="text-xs text-[#667085]">/ {g.line}</span>
+
+                <span className="ml-auto text-xs bg-[#F2F4F7] px-2 py-0.5 rounded-full">
+                  {g.items.length} SKU
+                </span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead className="bg-[#F9FAFB] text-[#98A2B3]">
+                    <tr>
+                      <th className="px-3 py-2 text-left">Group</th>
+                      <th className="px-3 py-2 text-left">SKU</th>
+                      <th className="px-3 py-2 text-right">Size</th>
+                      <th className="px-3 py-2 text-right">
+                        Speed (Bot./Hr.)
+                      </th>
+                      <th className="px-3 py-2 text-left">Remark</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {g.items.map((r) => {
+                      const rowColor = GROUP_COLORS[r.group_product ?? ""] ?? {
+                        bg: "#F2F4F7",
+                        text: "#475467",
+                        dot: "#667085",
+                      };
+
+                      return (
+                        <tr
+                          key={r._id}
+                          className="border-t border-[#F2F4F7] hover:bg-[#FAFBFF]"
+                        >
+                          <td className="px-3 py-2">
+                            <span
+                              className="px-2 py-0.5 rounded-md font-semibold"
+                              style={{
+                                backgroundColor: rowColor.bg,
+                                color: rowColor.text,
+                              }}
+                            >
+                              {r.group_product ?? "-"}
+                            </span>
+                          </td>
+
+                          <td className="px-3 py-2 font-medium text-[#101828]">
+                            {r.sku_name}
+                          </td>
+
+                          <td className="px-3 py-2 text-right tabular-nums">
+                            {r.size_ml?.toLocaleString() ?? "-"} ml
+                          </td>
+
+                          <td className="px-3 py-2 text-right tabular-nums font-semibold text-[#185FA5]">
+                            {r.speed_bph?.toLocaleString() ?? "-"}
+                          </td>
+
+                          <td className="px-3 py-2 text-[#B45309]">
+                            {r.remark ?? "—"}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead className="bg-[#F9FAFB] text-[#98A2B3]">
-                  <tr>
-                    <th className="px-3 py-2 text-left">Group</th>
-                   
-                    <th className="px-3 py-2 text-left">SKU</th>
-                    <th className="px-3 py-2 text-right">Size</th>
-                    <th className="px-3 py-2 text-right">Speed (Bot./Hr.)</th>
-                    <th className="px-3 py-2 text-left">Remark</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {g.items.map((r) => {
-                    const c = GROUP_COLORS[r.group_product ?? ""] ?? {
-                      bg: "#F2F4F7",
-                      text: "#475467",
-                      dot: "#667085",
-                    };
-
-                    return (
-                      <tr
-                        key={r._id}
-                        className="border-t border-[#F2F4F7] hover:bg-[#FAFBFF]"
-                      >
-                        <td className="px-3 py-2">
-                          <span
-                            className="px-2 py-0.5 rounded-md font-semibold"
-                            style={{
-                              backgroundColor: c.bg,
-                              color: c.text,
-                            }}
-                          >
-                            {r.group_product ?? "-"}
-                          </span>
-                        </td>
-                      
-                        <td className="px-3 py-2 font-medium text-[#101828]">
-                          {r.sku_name}
-                        </td>
-                        <td className="px-3 py-2 text-right tabular-nums">
-                          {r.size_ml?.toLocaleString() ?? "-"} ml
-                        </td>
-                        <td className="px-3 py-2 text-right tabular-nums font-semibold text-[#185FA5]">
-                          {r.speed_bph?.toLocaleString() ?? "-"}
-                        </td>
-                        <td className="px-3 py-2 text-[#B45309]">
-                          {r.remark ?? "—"}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
