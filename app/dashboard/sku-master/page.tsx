@@ -8,6 +8,14 @@ import {
   SkuMaster,
 } from "@/lib/api";
 
+const GROUP_ORDER = [
+  "Beer Bottle",
+  "Beer Can",
+  "Beer KEG",
+  "PET",
+  "S&W",
+];
+
 const GROUP_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
   "Beer Bottle": { bg: "#E6F1FB", text: "#0C447C", dot: "#185FA5" },
   "Beer Can": { bg: "#EAF3DE", text: "#27500A", dot: "#3B6D11" },
@@ -509,16 +517,30 @@ function SkuTableSection({
       map.get(key)?.push(r);
     });
 
-    return Array.from(map.entries()).map(([key, items]) => {
-      const [plant, group, line] = key.split("||");
+    return Array.from(map.entries())
+  .map(([key, items]) => {
+    const [plant, group, line] = key.split("||");
 
-      return {
-        plant,
-        group,
-        line,
-        items,
-      };
-    });
+    return {
+      plant,
+      group,
+      line,
+      items,
+    };
+  })
+  .sort((a, b) => {
+    const groupCompare =
+      GROUP_ORDER.indexOf(a.group) -
+      GROUP_ORDER.indexOf(b.group);
+
+    if (groupCompare !== 0) return groupCompare;
+
+    return a.line.localeCompare(
+      b.line,
+      undefined,
+      { numeric: true }
+    );
+  });
   }, [rows]);
 
   return (
