@@ -524,7 +524,7 @@ function SkuTableSection({
                 <thead className="bg-[#F9FAFB] text-[#98A2B3]">
                   <tr>
                     <th className="px-3 py-2 text-left">Group</th>
-                    <th className="px-3 py-2 text-left">Line Type</th>
+                   
                     <th className="px-3 py-2 text-left">SKU</th>
                     <th className="px-3 py-2 text-right">Size</th>
                     <th className="px-3 py-2 text-right">Speed (Bot./Hr.)</th>
@@ -556,9 +556,7 @@ function SkuTableSection({
                             {r.group_product ?? "-"}
                           </span>
                         </td>
-                        <td className="px-3 py-2 text-[#667085]">
-                          {r.line_type ?? "-"}
-                        </td>
+                      
                         <td className="px-3 py-2 font-medium text-[#101828]">
                           {r.sku_name}
                         </td>
