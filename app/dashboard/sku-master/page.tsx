@@ -501,14 +501,24 @@ function SkuTableSection({
   rows: SkuMaster[];
   onBack: () => void;
 }) {
+  const getGroupRank = (group?: string | null) => {
+    const cleanGroup = (group ?? "Other").trim();
+    const index = GROUP_ORDER.indexOf(cleanGroup);
+
+    // ถ้าไม่เจอใน GROUP_ORDER ให้ไปอยู่ท้ายสุด
+    return index === -1 ? 999 : index;
+  };
+
   const grouped = useMemo(() => {
     const map = new Map<string, SkuMaster[]>();
 
     rows.forEach((r) => {
-      const group = r.group_product ?? "Other";
+      const group = (r.group_product ?? "Other").trim();
+      const line = (r.line ?? "").trim();
+      const plant = (r.plant ?? "").trim();
 
-      // สำคัญ: แยก Line ตาม Group Product
-      const key = `${r.plant}||${group}||${r.line}`;
+      // แยกกรอบตาม Plant + Group Product + Line
+      const key = `${plant}||${group}||${line}`;
 
       if (!map.has(key)) {
         map.set(key, []);
@@ -518,29 +528,29 @@ function SkuTableSection({
     });
 
     return Array.from(map.entries())
-  .map(([key, items]) => {
-    const [plant, group, line] = key.split("||");
+      .map(([key, items]) => {
+        const [plant, group, line] = key.split("||");
 
-    return {
-      plant,
-      group,
-      line,
-      items,
-    };
-  })
-  .sort((a, b) => {
-    const groupCompare =
-      GROUP_ORDER.indexOf(a.group) -
-      GROUP_ORDER.indexOf(b.group);
+        return {
+          plant,
+          group,
+          line,
+          items: items.sort((a, b) =>
+            (a.sku_name ?? "").localeCompare(b.sku_name ?? "", undefined, {
+              numeric: true,
+            }),
+          ),
+        };
+      })
+      .sort((a, b) => {
+        const groupCompare = getGroupRank(a.group) - getGroupRank(b.group);
 
-    if (groupCompare !== 0) return groupCompare;
+        if (groupCompare !== 0) return groupCompare;
 
-    return a.line.localeCompare(
-      b.line,
-      undefined,
-      { numeric: true }
-    );
-  });
+        return a.line.localeCompare(b.line, undefined, {
+          numeric: true,
+        });
+      });
   }, [rows]);
 
   return (
@@ -608,7 +618,9 @@ function SkuTableSection({
 
                   <tbody>
                     {g.items.map((r) => {
-                      const rowColor = GROUP_COLORS[r.group_product ?? ""] ?? {
+                      const group = (r.group_product ?? "Other").trim();
+
+                      const rowColor = GROUP_COLORS[group] ?? {
                         bg: "#F2F4F7",
                         text: "#475467",
                         dot: "#667085",
@@ -627,7 +639,7 @@ function SkuTableSection({
                                 color: rowColor.text,
                               }}
                             >
-                              {r.group_product ?? "-"}
+                              {group}
                             </span>
                           </td>
 
