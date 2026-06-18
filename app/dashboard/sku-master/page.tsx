@@ -297,12 +297,6 @@ export default function SkuMasterPage() {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
-            <KpiCard icon="🏷️" value={groups.length} label="ประเภทผลิตภัณฑ์" color="#854F0B" />
-            <KpiCard icon="🏭" value={plants.length} label="โรงงาน (Plants)" color="#185FA5" />
-            <KpiCard icon="📊" value={totalLines} label="ไลน์ผลิต (Lines)" color="#0F6E56" />
-          </div>
-
           {viewMode === "group" && !selectedGroup && (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
               {groupSummary.map((g) => {
