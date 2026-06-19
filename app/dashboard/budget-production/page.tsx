@@ -351,13 +351,28 @@ export default function BudgetProductionPage() {
 
           {/* KPI Cards */}
           <div className="grid grid-cols-3 gap-4 mb-5">
-            <KpiCard icon="📊" label="Total Production"
-              value={kpi.prod.toFixed(0)} unit="ML" />
-            <KpiCard icon="🏭" label="Total Capacity"
-              value={kpi.cap.toFixed(0)} unit="ML" />
-            <KpiCard icon="⚡" label="Avg % Utilization"
-              value={kpi.util !== null ? kpi.util.toFixed(1) : '—'} unit="%" accent />
-          </div>
+  <KpiCard
+    icon="📊"
+    label="Production"
+    value={kpi.prod.toFixed(0)}
+    unit="ML"
+  />
+
+  <KpiCard
+    icon="🏭"
+    label="Capacity"
+    value={kpi.cap.toFixed(0)}
+    unit="ML"
+  />
+
+  <KpiCard
+    icon="⚡"
+    label="% Utilization"
+    value={kpi.util !== null ? kpi.util.toFixed(1) : '—'}
+    unit="%"
+    accent
+  />
+</div>
 
           {/* Error */}
           {error && (
